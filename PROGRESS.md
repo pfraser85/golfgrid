@@ -1,7 +1,7 @@
 # GolfGrid - Development Progress Log
 
 **Last Updated:** January 13, 2026
-**Status:** Calendar Tab Complete - UI Refinements & Firebase Integration Next
+**Status:** Country Club Design Complete - Recurring Availability Feature Live - Firebase Integration Next
 
 ---
 
@@ -25,13 +25,21 @@
 
 #### Availability System
 - ✅ **4 availability types** with emoji indicators:
+  - 👍 All Day (available anytime) - listed first for priority
   - 🌅 Morning (early tee times)
   - ☀️ Mid-day (afternoon rounds)
   - 🌇 Afternoon (evening tee times)
-  - 👍 Available anytime (free all day)
-- ✅ Availability icons positioned in **top-left** of day cards
-- ✅ Icons enlarged by 20% for better visibility
-- ✅ Clean modal for selecting availability
+- ✅ **Colored left borders** on day cards indicate availability type:
+  - 🟠 Orange border: Morning availability
+  - 🔵 Blue border: Mid-day availability
+  - 🟣 Purple border: Afternoon availability
+  - No border: All Day availability (clean look)
+- ✅ Clean modal for selecting availability (icons removed from day cards for minimal design)
+- ✅ **Recurring availability scheduler** with "Update Schedule" button:
+  - Set availability for specific days of week (Sun-Sat)
+  - Customizable duration (X days/weeks/months or indefinitely)
+  - Start date selection (won't override existing availability)
+  - Batch apply availability patterns (e.g., "Monday mornings, Tuesday all day")
 
 #### Event Creation System
 - ✅ **"Create Event" button** in calendar header (green button)
@@ -57,13 +65,35 @@
 - ✅ Multiple events per day supported (slightly offset)
 - ✅ **Day card auto-updates** to white background when event is added
 
+#### Country Club Design System (COMPLETED)
+- ✅ **Elegant color palette:**
+  - Cream background (#FFFEF9) for warmth and sophistication
+  - Navy blue (#3D5A80) for headers and titles
+  - Champagne gold (#D4AF6A) for accents and highlights
+  - Warm grey (#6B6B6B) for body text
+- ✅ **Premium typography:**
+  - Merriweather serif font for headers (imported from Google Fonts)
+  - Inter sans-serif for body text (imported from Google Fonts)
+- ✅ **Refined UI elements:**
+  - All buttons pill-shaped (rounded-full) throughout app
+  - Soft shadows (shadow-soft, shadow-soft-lg) replace harsh drop shadows
+  - Smooth transitions on all interactive elements
+  - Gold pill indicator on active bottom nav tab
+- ✅ **Visual hierarchy:**
+  - Navy month/year header with navy day numbers
+  - Cream hover states on navigation buttons
+  - Warm grey day-of-week headers
+  - Darker cancel buttons for better contrast
+
 #### UI Polish
-- ✅ Dark green (primary-700) calendar title
 - ✅ Border lines at top and under month/year for visual separation
 - ✅ All text has proper contrast for readability
 - ✅ **Help icon (?)** with modal showing availability and color guide
+- ✅ **Update Schedule button** (gold) for recurring availability management
+- ✅ **Create Event button** (navy) for quick event creation
 - ✅ Calendar centered on page (removed sidebar)
 - ✅ Responsive design for mobile and desktop
+- ✅ Fixed bottom nav overlap issue (proper padding prevents calendar overlap)
 
 ---
 
@@ -101,14 +131,20 @@
 ## 🎯 Current State
 
 ### What's Working Right Now:
-1. **Calendar Tab** is fully functional
-   - Mark availability on any future date
+1. **Calendar Tab** is fully functional with premium features
+   - Mark availability on any future date with colored border indicators
    - Create golf events with course name and tee time
    - Events display with beautiful color gradients
    - Events show course name and time
    - Help guide accessible via ? icon
+   - **NEW:** Recurring availability scheduler via "Update Schedule" button:
+     - Set weekly patterns (e.g., "Monday mornings, Tuesday all day")
+     - Customizable duration (X days/weeks/months or indefinitely)
+     - Start date selection to avoid overriding existing availability
+   - **NEW:** Country club elegant design with cream/navy/gold colors
+   - **NEW:** Premium typography (Merriweather serif + Inter sans-serif)
 
-2. **Bottom Navigation** switches between tabs
+2. **Bottom Navigation** switches between tabs with gold pill indicator on active tab
 
 3. **Other Tabs** have placeholder content (Messages, Play Now, Friends, Profile)
 
@@ -546,17 +582,18 @@ npm start
 ### Design Decisions Made:
 1. **Centered layout** - Removed sidebar for cleaner look
 2. **Help tooltip** - Guide accessible via ? icon
-3. **Time-based colors** - Orange/Blue/Purple gradients
+3. **Time-based colors** - Orange/Blue/Purple gradients for events
 4. **Smart positioning** - Events positioned by tee time
 5. **30% height events** - Leaves room for multiple events per day
 6. **White day cards** - When events exist (shows activity)
-
-### Pending Design Changes:
-1. **Remove time-of-day icons** from calendar cards (keep in modal)
-2. **Country club aesthetic** - cream, navy, gold color scheme
-3. **Typography upgrade** - serif headers, sans-serif body
-4. **Pill-shaped buttons** throughout app
-5. **Soft shadows** on cards
+7. **Colored borders** - Left borders on day cards show availability type (orange/blue/purple)
+8. **Minimal design** - Removed availability icons from day cards for cleaner look
+9. **Country club aesthetic** - Cream, navy, gold color scheme throughout
+10. **Premium typography** - Merriweather serif headers + Inter sans-serif body
+11. **Pill-shaped UI** - All buttons are fully rounded (rounded-full)
+12. **Soft shadows** - Gentle, refined shadows instead of harsh drop shadows
+13. **Recurring scheduler** - "Update Schedule" button for batch availability management
+14. **All Day first** - Availability options reordered with "All Day" at top for priority
 
 ### Known Limitations (To Fix with Firebase):
 - Events don't persist on refresh
@@ -575,24 +612,36 @@ npm start
 
 ## ✨ What You Can Demo Right Now
 
-1. **Navigate months** with arrow buttons
-2. **Click any future day** to mark availability
-3. **Create golf events** with course names and tee times
-4. **See events** display with color-coded gradients
-5. **View help guide** by clicking the ? icon
-6. **Switch tabs** using bottom navigation
+1. **Navigate months** with pill-shaped arrow buttons (navy hover states)
+2. **Click any future day** to mark availability (All Day, Morning, Mid-day, Afternoon)
+3. **See colored borders** appear on day cards based on availability type
+4. **Use Update Schedule** to set recurring weekly patterns (gold button):
+   - Select availability for each day of week (Sun-Sat)
+   - Choose custom duration (X days/weeks/months) or indefinitely
+   - Set start date to avoid overriding existing availability
+5. **Create golf events** with course names and tee times (navy button)
+6. **See events** display with color-coded gradients (orange/blue/purple)
+7. **View help guide** by clicking the ? icon
+8. **Switch tabs** using bottom navigation with gold pill indicator
+9. **Enjoy elegant design** with country club color scheme and premium fonts
 
 ---
 
 ## 🎯 Vision & Goals
 
-**Immediate (This Week):**
+**Immediate (Completed):**
 - ✅ Set up GitHub repository backup
 - ✅ Remove availability icons from calendar
 - ✅ Implement country club elegant design
-- ✅ Complete ADA compliance audit
-- ⏳ Set up Firebase
-- ⏳ Complete all 5 tabs with basic functionality
+- ✅ Add colored borders for availability indicators
+- ✅ Implement recurring availability scheduler
+- ✅ Add customizable duration options
+- ✅ Fix bottom nav overlap issue
+
+**Next Priority:**
+- ⏳ Complete ADA compliance audit (deferred for later - Task 3)
+- ⏳ Set up Firebase integration (Phase 1)
+- ⏳ Complete all 5 tabs with basic functionality (Phase 2)
 
 **Short-term (This Month):**
 - Friend system working
@@ -608,4 +657,15 @@ npm start
 
 ---
 
-**🎉 Great work today! The Calendar is beautiful and ready for design refinements. Let's make it elegant! 🏌️**
+**🎉 Incredible progress! The Calendar features a stunning country club design with recurring availability management! 🏌️**
+
+**🌟 Recent Accomplishments:**
+- ✅ Country club design system (cream, navy, gold) fully implemented
+- ✅ Premium typography (Merriweather + Inter from Google Fonts)
+- ✅ Recurring availability scheduler with customizable duration
+- ✅ Colored border indicators for availability types
+- ✅ Minimal, elegant UI with pill-shaped buttons
+- ✅ Fixed bottom nav overlap issue
+- ✅ All improvements committed to GitHub
+
+**🚀 Ready for Firebase Integration and expanding to other tabs!**

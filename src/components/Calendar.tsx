@@ -589,23 +589,35 @@ export default function Calendar() {
               onSubmit={(e) => {
                 e.preventDefault();
                 const formData = new FormData(e.currentTarget);
-                const duration = formData.get("duration") as string;
+                const durationType = formData.get("durationType") as string;
                 const daysOfWeek = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 
+                // Get start date
+                const startDateStr = formData.get("startDate") as string;
+                const startDate = startDateStr ? new Date(startDateStr) : new Date();
+                startDate.setHours(0, 0, 0, 0);
+
                 // Calculate end date based on duration
-                let endDate = new Date();
-                if (duration === "4weeks") {
-                  endDate.setDate(endDate.getDate() + 28);
-                } else if (duration === "4months") {
-                  endDate.setMonth(endDate.getMonth() + 4);
-                } else {
-                  // Indefinitely - set to 2 years from now
+                let endDate = new Date(startDate);
+                if (durationType === "indefinitely") {
+                  // Indefinitely - set to 2 years from start date
                   endDate.setFullYear(endDate.getFullYear() + 2);
+                } else {
+                  const durationValue = parseInt(formData.get("durationValue") as string) || 1;
+                  const durationUnit = formData.get("durationUnit") as string;
+
+                  if (durationUnit === "days") {
+                    endDate.setDate(endDate.getDate() + durationValue);
+                  } else if (durationUnit === "weeks") {
+                    endDate.setDate(endDate.getDate() + (durationValue * 7));
+                  } else if (durationUnit === "months") {
+                    endDate.setMonth(endDate.getMonth() + durationValue);
+                  }
                 }
 
                 // Process each day of week
                 const newAvailability = new Map(availability);
-                const currentDateIter = new Date();
+                const currentDateIter = new Date(startDate);
 
                 while (currentDateIter <= endDate) {
                   const dayOfWeek = daysOfWeek[currentDateIter.getDay()];
@@ -627,64 +639,98 @@ export default function Calendar() {
               }}
               className="space-y-6"
             >
-              {/* Days of Week Selection */}
-              <div className="space-y-3">
-                <h4 className="font-semibold text-navy mb-3">Select Days & Availability</h4>
+              {/* Start Date */}
+              <div>
+                <label className="block text-sm font-semibold text-navy mb-2">
+                  Start Date
+                </label>
+                <input
+                  type="date"
+                  name="startDate"
+                  defaultValue={new Date().toISOString().split('T')[0]}
+                  className="w-full px-4 py-2 border-2 border-gray-200 rounded-full focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-navy bg-white"
+                />
+                <p className="text-xs text-warmgrey mt-1">
+                  Schedule will start from this date (won't override existing availability)
+                </p>
+              </div>
 
-                {[
-                  { id: "monday", label: "Monday", emoji: "📅" },
-                  { id: "tuesday", label: "Tuesday", emoji: "📅" },
-                  { id: "wednesday", label: "Wednesday", emoji: "📅" },
-                  { id: "thursday", label: "Thursday", emoji: "📅" },
-                  { id: "friday", label: "Friday", emoji: "📅" },
-                  { id: "saturday", label: "Saturday", emoji: "📅" },
-                  { id: "sunday", label: "Sunday", emoji: "📅" },
-                ].map((day) => (
-                  <div key={day.id} className="flex items-center gap-3 p-3 bg-cream-100 rounded-xl">
-                    <span className="text-2xl">{day.emoji}</span>
-                    <label className="font-medium text-navy w-32">{day.label}</label>
-                    <select
-                      name={day.id}
-                      defaultValue="none"
-                      className="flex-1 px-3 py-2 border-2 border-gray-200 rounded-full focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-navy bg-white"
-                    >
-                      <option value="none">Not Available</option>
-                      <option value="full-day">All Day</option>
-                      <option value="morning">Morning</option>
-                      <option value="midday">Mid-day</option>
-                      <option value="afternoon">Afternoon</option>
-                    </select>
-                  </div>
-                ))}
+              {/* Days of Week Selection */}
+              <div>
+                <h4 className="font-semibold text-navy mb-3">Select Days & Availability</h4>
+                <div className="grid grid-cols-1 gap-2">
+                  {[
+                    { id: "sunday", label: "Sun" },
+                    { id: "monday", label: "Mon" },
+                    { id: "tuesday", label: "Tue" },
+                    { id: "wednesday", label: "Wed" },
+                    { id: "thursday", label: "Thu" },
+                    { id: "friday", label: "Fri" },
+                    { id: "saturday", label: "Sat" },
+                  ].map((day) => (
+                    <div key={day.id} className="flex items-center gap-2">
+                      <label className="font-medium text-navy w-12 text-sm">{day.label}</label>
+                      <select
+                        name={day.id}
+                        defaultValue="none"
+                        className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-full focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-navy bg-white"
+                      >
+                        <option value="none">Not Available</option>
+                        <option value="full-day">All Day</option>
+                        <option value="morning">Morning</option>
+                        <option value="midday">Mid-day</option>
+                        <option value="afternoon">Afternoon</option>
+                      </select>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Duration Selection */}
               <div>
                 <h4 className="font-semibold text-navy mb-3">Duration</h4>
-                <div className="space-y-2">
+                <div className="space-y-3">
+                  {/* Custom Duration */}
                   <label className="flex items-center p-3 bg-white border-2 border-gray-200 rounded-full hover:border-gold transition-all cursor-pointer">
                     <input
                       type="radio"
-                      name="duration"
-                      value="4weeks"
+                      name="durationType"
+                      value="custom"
                       defaultChecked
                       className="mr-3 w-4 h-4 text-gold focus:ring-gold"
                     />
-                    <span className="text-navy font-medium">Next 4 Weeks</span>
-                  </label>
-                  <label className="flex items-center p-3 bg-white border-2 border-gray-200 rounded-full hover:border-gold transition-all cursor-pointer">
+                    <span className="text-navy font-medium mr-2">Next</span>
                     <input
-                      type="radio"
-                      name="duration"
-                      value="4months"
-                      className="mr-3 w-4 h-4 text-gold focus:ring-gold"
+                      type="number"
+                      name="durationValue"
+                      min="1"
+                      defaultValue="4"
+                      className="w-16 px-2 py-1 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent text-navy"
+                      onClick={(e) => {
+                        const radio = e.currentTarget.parentElement?.querySelector('input[type="radio"]') as HTMLInputElement;
+                        if (radio) radio.checked = true;
+                      }}
                     />
-                    <span className="text-navy font-medium">Next 4 Months</span>
+                    <select
+                      name="durationUnit"
+                      defaultValue="weeks"
+                      className="ml-2 px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent text-navy bg-white"
+                      onClick={(e) => {
+                        const radio = e.currentTarget.parentElement?.querySelector('input[type="radio"]') as HTMLInputElement;
+                        if (radio) radio.checked = true;
+                      }}
+                    >
+                      <option value="days">Days</option>
+                      <option value="weeks">Weeks</option>
+                      <option value="months">Months</option>
+                    </select>
                   </label>
+
+                  {/* Indefinitely */}
                   <label className="flex items-center p-3 bg-white border-2 border-gray-200 rounded-full hover:border-gold transition-all cursor-pointer">
                     <input
                       type="radio"
-                      name="duration"
+                      name="durationType"
                       value="indefinitely"
                       className="mr-3 w-4 h-4 text-gold focus:ring-gold"
                     />
