@@ -133,7 +133,7 @@ export default function Calendar() {
             <div className="flex items-center gap-4">
               <button
                 onClick={goToPreviousMonth}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-700"
+                className="p-2 hover:bg-cream-200 rounded-full transition-colors text-navy"
               >
                 <svg
                   className="w-6 h-6"
@@ -149,12 +149,12 @@ export default function Calendar() {
                   />
                 </svg>
               </button>
-              <h2 className="text-3xl font-bold text-primary-700">
+              <h2 className="text-3xl font-bold text-navy">
                 {monthName} {year}
               </h2>
               <button
                 onClick={goToNextMonth}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-700"
+                className="p-2 hover:bg-cream-200 rounded-full transition-colors text-navy"
               >
                 <svg
                   className="w-6 h-6"
@@ -177,7 +177,7 @@ export default function Calendar() {
               {/* Help/Guide Icon */}
               <button
                 onClick={() => setShowGuide(true)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 hover:text-primary-600"
+                className="p-2 hover:bg-cream-200 rounded-full transition-colors text-warmgrey hover:text-navy"
                 title="Availability Guide"
               >
                 <svg
@@ -201,7 +201,7 @@ export default function Calendar() {
                   setShowCreateEvent(true);
                   setEventDate(null);
                 }}
-                className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
+                className="flex items-center gap-2 px-6 py-2 bg-navy text-white rounded-full hover:bg-navy-dark transition-colors shadow-soft"
               >
                 <svg
                   className="w-5 h-5"
@@ -229,7 +229,7 @@ export default function Calendar() {
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
           <div
             key={day}
-            className="text-center text-sm font-semibold text-gray-600 py-2"
+            className="text-center text-sm font-semibold text-warmgrey-light py-2"
           >
             {day}
           </div>
@@ -277,7 +277,7 @@ export default function Calendar() {
                   setEventDate(selectedDay);
                   setSelectedDay(null);
                 }}
-                className="p-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex-shrink-0"
+                className="p-2 bg-navy text-white rounded-full hover:bg-navy-dark transition-colors flex-shrink-0"
                 title="Create Event"
               >
                 <svg
@@ -298,60 +298,60 @@ export default function Calendar() {
             <div className="space-y-3">
               <button
                 onClick={() => handleAvailabilityChange(selectedDay, "morning")}
-                className="w-full p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-primary-500 hover:bg-primary-50 transition-all text-left flex items-center"
+                className="w-full p-4 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
               >
                 <span className="text-3xl mr-3">🌅</span>
                 <div>
-                  <div className="font-semibold text-gray-900">Morning</div>
-                  <div className="text-sm text-gray-500">Early tee time</div>
+                  <div className="font-semibold text-navy">Morning</div>
+                  <div className="text-sm text-warmgrey">Early tee time</div>
                 </div>
               </button>
               <button
                 onClick={() => handleAvailabilityChange(selectedDay, "midday")}
-                className="w-full p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-primary-500 hover:bg-primary-50 transition-all text-left flex items-center"
+                className="w-full p-4 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
               >
                 <span className="text-3xl mr-3">☀️</span>
                 <div>
-                  <div className="font-semibold text-gray-900">Mid-day</div>
-                  <div className="text-sm text-gray-500">Afternoon round</div>
+                  <div className="font-semibold text-navy">Mid-day</div>
+                  <div className="text-sm text-warmgrey">Afternoon round</div>
                 </div>
               </button>
               <button
                 onClick={() =>
                   handleAvailabilityChange(selectedDay, "afternoon")
                 }
-                className="w-full p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-primary-500 hover:bg-primary-50 transition-all text-left flex items-center"
+                className="w-full p-4 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
               >
                 <span className="text-3xl mr-3">🌇</span>
                 <div>
-                  <div className="font-semibold text-gray-900">Afternoon</div>
-                  <div className="text-sm text-gray-500">Evening tee time</div>
+                  <div className="font-semibold text-navy">Afternoon</div>
+                  <div className="text-sm text-warmgrey">Evening tee time</div>
                 </div>
               </button>
               <button
                 onClick={() => handleAvailabilityChange(selectedDay, "full-day")}
-                className="w-full p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-primary-500 hover:bg-primary-50 transition-all text-left flex items-center"
+                className="w-full p-4 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
               >
                 <span className="text-3xl mr-3">👍</span>
                 <div>
-                  <div className="font-semibold text-gray-900">All Day</div>
-                  <div className="text-sm text-gray-500">Available anytime</div>
+                  <div className="font-semibold text-navy">All Day</div>
+                  <div className="text-sm text-warmgrey">Available anytime</div>
                 </div>
               </button>
               <button
                 onClick={() => handleAvailabilityChange(selectedDay, null)}
-                className="w-full p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-red-500 hover:bg-red-50 transition-all text-left flex items-center"
+                className="w-full p-4 bg-white border-2 border-gray-200 rounded-full hover:border-red-500 hover:bg-red-50 transition-all text-left flex items-center shadow-soft"
               >
                 <span className="text-3xl mr-3">❌</span>
                 <div>
-                  <div className="font-semibold text-gray-900">Not Available</div>
-                  <div className="text-sm text-gray-500">Clear availability</div>
+                  <div className="font-semibold text-navy">Not Available</div>
+                  <div className="text-sm text-warmgrey">Clear availability</div>
                 </div>
               </button>
             </div>
             <button
               onClick={() => setSelectedDay(null)}
-              className="w-full mt-4 p-3 bg-gray-100 rounded-xl font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+              className="w-full mt-4 p-3 bg-cream-200 rounded-full font-medium text-navy hover:bg-gray-200 transition-colors"
             >
               Cancel
             </button>
@@ -415,13 +415,13 @@ export default function Calendar() {
                 <button
                   type="button"
                   onClick={() => setShowCreateEvent(false)}
-                  className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+                  className="flex-1 px-4 py-3 bg-cream-200 text-navy rounded-full font-medium hover:bg-gray-200 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-3 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors shadow-sm"
+                  className="flex-1 px-4 py-3 bg-navy text-white rounded-full font-medium hover:bg-navy-dark transition-colors shadow-soft"
                 >
                   Create Event
                 </button>
@@ -525,7 +525,7 @@ export default function Calendar() {
 
             <button
               onClick={() => setShowGuide(false)}
-              className="w-full mt-6 p-3 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors"
+              className="w-full mt-6 p-3 bg-navy text-white rounded-full font-medium hover:bg-navy-dark transition-colors shadow-soft"
             >
               Got it!
             </button>

@@ -151,13 +151,13 @@ export default function DayTile({
       className={`
         aspect-square rounded-xl p-2 relative transition-all overflow-hidden
         ${getBackgroundColor()}
-        ${isSelected ? "ring-2 ring-primary-500 ring-offset-2" : ""}
+        ${isSelected ? "ring-2 ring-gold ring-offset-2" : ""}
         ${
           !isPast && onClick
-            ? "hover:shadow-md hover:scale-105 cursor-pointer active:scale-95"
+            ? "hover:shadow-soft-lg hover:scale-105 cursor-pointer active:scale-95"
             : "cursor-not-allowed opacity-60"
         }
-        ${isToday ? "ring-2 ring-blue-500" : ""}
+        ${isToday ? "ring-2 ring-navy" : ""}
       `}
     >
       {/* Event boxes */}
@@ -191,7 +191,7 @@ export default function DayTile({
       )}
 
       {/* Date number in top-right */}
-      <div className="absolute top-1 right-2 text-sm font-semibold text-gray-700 z-20">
+      <div className="absolute top-1 right-2 text-sm font-semibold text-navy z-20">
         {dayNumber}
       </div>
 

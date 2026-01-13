@@ -238,14 +238,14 @@ General:
    - All components - Button styling to pill shape
 
 **Acceptance Criteria:**
-- [ ] Color palette variables defined in Tailwind config
-- [ ] Serif font for headers, sans-serif for body
-- [ ] All cards have soft rounded corners (8-12px)
-- [ ] Buttons are pill-shaped throughout app
-- [ ] Calendar maintains white/light grey/darker grey day states
-- [ ] Overall aesthetic feels refined and country club elegant
-- [ ] Shadows are gentle and not harsh
-- [ ] Text hierarchy uses warm grey tones
+- [x] Color palette variables defined in Tailwind config
+- [x] Serif font for headers, sans-serif for body
+- [x] All cards have soft rounded corners (8-12px)
+- [x] Buttons are pill-shaped throughout app
+- [x] Calendar maintains white/light grey/darker grey day states
+- [x] Overall aesthetic feels refined and country club elegant
+- [x] Shadows are gentle and not harsh
+- [x] Text hierarchy uses warm grey tones
 
 **Files to Modify:**
 - `tailwind.config.js` - Add theme colors and fonts
