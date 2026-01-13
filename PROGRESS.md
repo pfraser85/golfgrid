@@ -145,13 +145,13 @@ git push -u origin main
 ```
 
 **Acceptance Criteria:**
-- [ ] Git initialized locally
-- [ ] .gitignore includes: node_modules/, .env.local, .next/, .DS_Store
-- [ ] GitHub repository created
-- [ ] All code pushed to GitHub
-- [ ] Repository URL documented in this file
+- [x] Git initialized locally
+- [x] .gitignore includes: node_modules/, .env.local, .next/, .DS_Store
+- [x] GitHub repository created
+- [x] All code pushed to GitHub
+- [x] Repository URL documented in this file
 
-**Repository URL:** _[Add after creation]_
+**Repository URL:** https://github.com/pfraser85/golfgrid
 
 ---
 
