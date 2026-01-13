@@ -164,10 +164,10 @@ git push -u origin main
 - Users can still select time slots when clicking a day, icons just won't display on calendar
 
 **Acceptance Criteria:**
-- [ ] No time-of-day icons visible on calendar day cards
-- [ ] Availability modal still shows all 4 options (morning, mid-day, afternoon, anytime)
-- [ ] Availability data structure unchanged (still tracked in state)
-- [ ] Day cards remain clean and uncluttered
+- [x] No time-of-day icons visible on calendar day cards
+- [x] Availability modal still shows all 4 options (morning, mid-day, afternoon, anytime)
+- [x] Availability data structure unchanged (still tracked in state)
+- [x] Day cards remain clean and uncluttered
 
 **Files to Modify:**
 - `src/components/DayTile.tsx` - Remove icon rendering logic

@@ -190,13 +190,6 @@ export default function DayTile({
         </div>
       )}
 
-      {/* Availability icon in top-left */}
-      {getAvailabilityIcon() && (
-        <div className="absolute top-1 left-2 z-20">
-          {getAvailabilityIcon()}
-        </div>
-      )}
-
       {/* Date number in top-right */}
       <div className="absolute top-1 right-2 text-sm font-semibold text-gray-700 z-20">
         {dayNumber}
