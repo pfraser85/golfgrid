@@ -26,6 +26,7 @@ export default function Calendar() {
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  const [showUpdateSchedule, setShowUpdateSchedule] = useState(false);
   const [eventDate, setEventDate] = useState<Date | null>(null);
   const [availability, setAvailability] = useState<Map<string, DayAvailability>>(
     new Map()
@@ -172,7 +173,7 @@ export default function Calendar() {
               </button>
             </div>
 
-            {/* Help Icon and Create Event Button */}
+            {/* Help Icon, Update Schedule, and Create Event Button */}
             <div className="flex items-center gap-3">
               {/* Help/Guide Icon */}
               <button
@@ -193,6 +194,27 @@ export default function Calendar() {
                     d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
+              </button>
+
+              {/* Update Schedule Button */}
+              <button
+                onClick={() => setShowUpdateSchedule(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-gold text-white rounded-full hover:bg-gold-dark transition-colors shadow-soft"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+                <span className="font-medium">Update Schedule</span>
               </button>
 
               {/* Create Event Button */}
@@ -297,6 +319,16 @@ export default function Calendar() {
             </div>
             <div className="space-y-3">
               <button
+                onClick={() => handleAvailabilityChange(selectedDay, "full-day")}
+                className="w-full p-4 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
+              >
+                <span className="text-3xl mr-3">👍</span>
+                <div>
+                  <div className="font-semibold text-navy">All Day</div>
+                  <div className="text-sm text-warmgrey">Available anytime</div>
+                </div>
+              </button>
+              <button
                 onClick={() => handleAvailabilityChange(selectedDay, "morning")}
                 className="w-full p-4 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
               >
@@ -329,16 +361,6 @@ export default function Calendar() {
                 </div>
               </button>
               <button
-                onClick={() => handleAvailabilityChange(selectedDay, "full-day")}
-                className="w-full p-4 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
-              >
-                <span className="text-3xl mr-3">👍</span>
-                <div>
-                  <div className="font-semibold text-navy">All Day</div>
-                  <div className="text-sm text-warmgrey">Available anytime</div>
-                </div>
-              </button>
-              <button
                 onClick={() => handleAvailabilityChange(selectedDay, null)}
                 className="w-full p-4 bg-white border-2 border-gray-200 rounded-full hover:border-red-500 hover:bg-red-50 transition-all text-left flex items-center shadow-soft"
               >
@@ -351,7 +373,7 @@ export default function Calendar() {
             </div>
             <button
               onClick={() => setSelectedDay(null)}
-              className="w-full mt-4 p-3 bg-cream-200 rounded-full font-medium text-navy hover:bg-gray-200 transition-colors"
+              className="w-full mt-4 p-3 bg-warmgrey-light text-white rounded-full font-medium hover:bg-warmgrey transition-colors"
             >
               Cancel
             </button>
@@ -529,6 +551,165 @@ export default function Calendar() {
             >
               Got it!
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Update Schedule Modal */}
+      {showUpdateSchedule && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-2xl font-bold text-navy">Update Recurring Schedule</h3>
+              <button
+                onClick={() => setShowUpdateSchedule(false)}
+                className="p-1 hover:bg-cream-200 rounded-full transition-colors"
+              >
+                <svg
+                  className="w-6 h-6 text-warmgrey"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <p className="text-sm text-warmgrey mb-6">
+              Set your recurring availability for specific days of the week. Perfect for regular tee times!
+            </p>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const duration = formData.get("duration") as string;
+                const daysOfWeek = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+
+                // Calculate end date based on duration
+                let endDate = new Date();
+                if (duration === "4weeks") {
+                  endDate.setDate(endDate.getDate() + 28);
+                } else if (duration === "4months") {
+                  endDate.setMonth(endDate.getMonth() + 4);
+                } else {
+                  // Indefinitely - set to 2 years from now
+                  endDate.setFullYear(endDate.getFullYear() + 2);
+                }
+
+                // Process each day of week
+                const newAvailability = new Map(availability);
+                const currentDateIter = new Date();
+
+                while (currentDateIter <= endDate) {
+                  const dayOfWeek = daysOfWeek[currentDateIter.getDay()];
+                  const availabilityType = formData.get(dayOfWeek) as AvailabilityType;
+
+                  if (availabilityType && availabilityType !== "none") {
+                    const dateKey = currentDateIter.toISOString().split("T")[0];
+                    newAvailability.set(dateKey, {
+                      date: new Date(currentDateIter),
+                      availability: availabilityType,
+                    });
+                  }
+
+                  currentDateIter.setDate(currentDateIter.getDate() + 1);
+                }
+
+                setAvailability(newAvailability);
+                setShowUpdateSchedule(false);
+              }}
+              className="space-y-6"
+            >
+              {/* Days of Week Selection */}
+              <div className="space-y-3">
+                <h4 className="font-semibold text-navy mb-3">Select Days & Availability</h4>
+
+                {[
+                  { id: "monday", label: "Monday", emoji: "📅" },
+                  { id: "tuesday", label: "Tuesday", emoji: "📅" },
+                  { id: "wednesday", label: "Wednesday", emoji: "📅" },
+                  { id: "thursday", label: "Thursday", emoji: "📅" },
+                  { id: "friday", label: "Friday", emoji: "📅" },
+                  { id: "saturday", label: "Saturday", emoji: "📅" },
+                  { id: "sunday", label: "Sunday", emoji: "📅" },
+                ].map((day) => (
+                  <div key={day.id} className="flex items-center gap-3 p-3 bg-cream-100 rounded-xl">
+                    <span className="text-2xl">{day.emoji}</span>
+                    <label className="font-medium text-navy w-32">{day.label}</label>
+                    <select
+                      name={day.id}
+                      defaultValue="none"
+                      className="flex-1 px-3 py-2 border-2 border-gray-200 rounded-full focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-navy bg-white"
+                    >
+                      <option value="none">Not Available</option>
+                      <option value="full-day">All Day</option>
+                      <option value="morning">Morning</option>
+                      <option value="midday">Mid-day</option>
+                      <option value="afternoon">Afternoon</option>
+                    </select>
+                  </div>
+                ))}
+              </div>
+
+              {/* Duration Selection */}
+              <div>
+                <h4 className="font-semibold text-navy mb-3">Duration</h4>
+                <div className="space-y-2">
+                  <label className="flex items-center p-3 bg-white border-2 border-gray-200 rounded-full hover:border-gold transition-all cursor-pointer">
+                    <input
+                      type="radio"
+                      name="duration"
+                      value="4weeks"
+                      defaultChecked
+                      className="mr-3 w-4 h-4 text-gold focus:ring-gold"
+                    />
+                    <span className="text-navy font-medium">Next 4 Weeks</span>
+                  </label>
+                  <label className="flex items-center p-3 bg-white border-2 border-gray-200 rounded-full hover:border-gold transition-all cursor-pointer">
+                    <input
+                      type="radio"
+                      name="duration"
+                      value="4months"
+                      className="mr-3 w-4 h-4 text-gold focus:ring-gold"
+                    />
+                    <span className="text-navy font-medium">Next 4 Months</span>
+                  </label>
+                  <label className="flex items-center p-3 bg-white border-2 border-gray-200 rounded-full hover:border-gold transition-all cursor-pointer">
+                    <input
+                      type="radio"
+                      name="duration"
+                      value="indefinitely"
+                      className="mr-3 w-4 h-4 text-gold focus:ring-gold"
+                    />
+                    <span className="text-navy font-medium">Indefinitely</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowUpdateSchedule(false)}
+                  className="flex-1 px-4 py-3 bg-warmgrey-light text-white rounded-full font-medium hover:bg-warmgrey transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-3 bg-gold text-white rounded-full font-medium hover:bg-gold-dark transition-colors shadow-soft"
+                >
+                  Apply Schedule
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

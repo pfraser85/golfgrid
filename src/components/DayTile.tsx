@@ -41,6 +41,22 @@ export default function DayTile({
     return "bg-white border-2 border-gray-300";
   };
 
+  // Get colored border based on availability type
+  const getAvailabilityBorder = () => {
+    if (!availability?.availability || availability.availability === "full-day") return "";
+
+    switch (availability.availability) {
+      case "morning":
+        return "border-l-4 border-l-orange-400";
+      case "midday":
+        return "border-l-4 border-l-blue-400";
+      case "afternoon":
+        return "border-l-4 border-l-purple-400";
+      default:
+        return "";
+    }
+  };
+
   // Get the availability icon
   const getAvailabilityIcon = () => {
     if (!availability?.availability) return null;
@@ -151,6 +167,7 @@ export default function DayTile({
       className={`
         aspect-square rounded-xl p-2 relative transition-all overflow-hidden
         ${getBackgroundColor()}
+        ${getAvailabilityBorder()}
         ${isSelected ? "ring-2 ring-gold ring-offset-2" : ""}
         ${
           !isPast && onClick
