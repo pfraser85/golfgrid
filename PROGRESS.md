@@ -1,7 +1,7 @@
 # GolfGrid - Development Progress Log
 
-**Last Updated:** January 13, 2026
-**Status:** Country Club Design Complete - Recurring Availability Feature Live - Firebase Integration Next
+**Last Updated:** January 13, 2026 (Evening)
+**Status:** UI Refinements Complete - Day Card Modal Restructured - Course Search Tab Renamed
 
 ---
 
@@ -12,7 +12,9 @@
 - **Tailwind CSS v3** configured and working
 - **PWA manifest** created at `/public/manifest.json`
 - **Development server** running on http://localhost:3000
-- **5-tab bottom navigation** implemented (Messages, Play Now, Calendar, Friends, Profile)
+- **5-tab bottom navigation** implemented (Messages, Course Search, Calendar, Friends, Profile)
+  - Updated "Play Now" to "Course Search" for clarity
+  - Profile icon updated to standard silhouette icon (👤)
 
 ### ✅ Calendar Feature (FULLY COMPLETE)
 
@@ -35,9 +37,15 @@
   - 🟣 Purple border: Afternoon availability
   - No border: All Day availability (clean look)
 - ✅ Clean modal for selecting availability (icons removed from day cards for minimal design)
-- ✅ **Recurring availability scheduler** with "Update Schedule" button:
+- ✅ **Day card modal restructured** with action hierarchy:
+  - **Primary action:** "Create Event" button displayed first (navy blue, prominent)
+  - **Secondary action:** Availability options below with "Or mark your availability:" label
+  - Time slot descriptions updated: "Sunrise - 10:59 AM", "11:00 AM - 2:59 PM", "3:00 PM - Sunset"
+- ✅ **Recurring availability scheduler** with "Update Availability" button:
   - Set availability for specific days of week (Sun-Sat)
   - Customizable duration (X days/weeks/months or indefinitely)
+  - **Gold highlighting** on selected duration option for better mobile UX
+  - Improved chevron positioning on day-of-week dropdowns
   - Start date selection (won't override existing availability)
   - Batch apply availability patterns (e.g., "Monday mornings, Tuesday all day")
 
@@ -89,8 +97,12 @@
 - ✅ Border lines at top and under month/year for visual separation
 - ✅ All text has proper contrast for readability
 - ✅ **Help icon (?)** with modal showing availability and color guide
-- ✅ **Update Schedule button** (gold) for recurring availability management
+- ✅ **Update Availability button** (gold) for recurring availability management
 - ✅ **Create Event button** (navy) for quick event creation
+- ✅ **Day card modal hierarchy**: Create Event primary action, availability marking secondary
+- ✅ **Duration selection**: Gold highlighting on selected option (better mobile UX)
+- ✅ **Chevron positioning**: Improved dropdown arrow placement on day-of-week selects
+- ✅ **Time descriptions**: Clear time ranges for Morning/Mid-day/Afternoon slots
 - ✅ Calendar centered on page (removed sidebar)
 - ✅ Responsive design for mobile and desktop
 - ✅ Fixed bottom nav overlap issue (proper padding prevents calendar overlap)
@@ -137,9 +149,10 @@
    - Events display with beautiful color gradients
    - Events show course name and time
    - Help guide accessible via ? icon
-   - **NEW:** Recurring availability scheduler via "Update Schedule" button:
+   - **NEW:** Recurring availability scheduler via "Update Availability" button:
      - Set weekly patterns (e.g., "Monday mornings, Tuesday all day")
      - Customizable duration (X days/weeks/months or indefinitely)
+     - Gold highlighting on selected duration for mobile UX
      - Start date selection to avoid overriding existing availability
    - **NEW:** Country club elegant design with cream/navy/gold colors
    - **NEW:** Premium typography (Merriweather serif + Inter sans-serif)
@@ -592,8 +605,12 @@ npm start
 10. **Premium typography** - Merriweather serif headers + Inter sans-serif body
 11. **Pill-shaped UI** - All buttons are fully rounded (rounded-full)
 12. **Soft shadows** - Gentle, refined shadows instead of harsh drop shadows
-13. **Recurring scheduler** - "Update Schedule" button for batch availability management
+13. **Recurring scheduler** - "Update Availability" button for batch availability management
 14. **All Day first** - Availability options reordered with "All Day" at top for priority
+15. **Action hierarchy** - Day card modal shows "Create Event" first as primary action
+16. **Mobile-friendly** - Gold highlighting on selected duration options for clear feedback
+17. **Clear time ranges** - Specific time descriptions (e.g., "Sunrise - 10:59 AM")
+18. **Course Search** - Renamed "Play Now" tab to "Course Search" for clarity
 
 ### Known Limitations (To Fix with Firebase):
 - Events don't persist on refresh
@@ -613,17 +630,23 @@ npm start
 ## ✨ What You Can Demo Right Now
 
 1. **Navigate months** with pill-shaped arrow buttons (navy hover states)
-2. **Click any future day** to mark availability (All Day, Morning, Mid-day, Afternoon)
-3. **See colored borders** appear on day cards based on availability type
-4. **Use Update Schedule** to set recurring weekly patterns (gold button):
-   - Select availability for each day of week (Sun-Sat)
+2. **Click any future day** to see restructured modal:
+   - **Primary action:** "Create Event" button prominently displayed at top
+   - **Secondary actions:** Availability options below with clear time ranges
+   - Time descriptions: "Sunrise - 10:59 AM", "11:00 AM - 2:59 PM", "3:00 PM - Sunset"
+3. **Mark availability** (All Day, Morning, Mid-day, Afternoon)
+4. **See colored borders** appear on day cards based on availability type
+5. **Use Update Availability** to set recurring weekly patterns (gold button):
+   - Select availability for each day of week (Sun-Sat) with improved dropdown chevrons
    - Choose custom duration (X days/weeks/months) or indefinitely
+   - **Gold highlighting** on selected duration option for clear feedback
    - Set start date to avoid overriding existing availability
-5. **Create golf events** with course names and tee times (navy button)
-6. **See events** display with color-coded gradients (orange/blue/purple)
-7. **View help guide** by clicking the ? icon
-8. **Switch tabs** using bottom navigation with gold pill indicator
-9. **Enjoy elegant design** with country club color scheme and premium fonts
+6. **Create golf events** with course names and tee times (navy button)
+7. **See events** display with color-coded gradients (orange/blue/purple)
+8. **View help guide** by clicking the ? icon
+9. **Switch tabs** using bottom navigation with gold pill indicator
+10. **Navigate to Course Search** tab (renamed from "Play Now")
+11. **Enjoy elegant design** with country club color scheme and premium fonts
 
 ---
 
@@ -659,13 +682,22 @@ npm start
 
 **🎉 Incredible progress! The Calendar features a stunning country club design with recurring availability management! 🏌️**
 
-**🌟 Recent Accomplishments:**
+**🌟 Recent Accomplishments (January 13, 2026 - Evening Session):**
+- ✅ Day card modal restructured with clear action hierarchy (Create Event primary, Update Availability secondary)
+- ✅ Button text updated from "Update Schedule" to "Update Availability" for clarity
+- ✅ Gold highlighting on selected duration options for better mobile UX
+- ✅ Chevron icon positioning improved on day-of-week select dropdowns
+- ✅ Time slot descriptions updated with specific time ranges (Sunrise - 10:59 AM, etc.)
+- ✅ Bottom navigation updated: "Play Now" → "Course Search"
+- ✅ Profile icon updated to standard silhouette (👤) for more polished look
+- ✅ All UI refinements committed to GitHub
+
+**Previous Session Accomplishments:**
 - ✅ Country club design system (cream, navy, gold) fully implemented
 - ✅ Premium typography (Merriweather + Inter from Google Fonts)
 - ✅ Recurring availability scheduler with customizable duration
 - ✅ Colored border indicators for availability types
 - ✅ Minimal, elegant UI with pill-shaped buttons
 - ✅ Fixed bottom nav overlap issue
-- ✅ All improvements committed to GitHub
 
 **🚀 Ready for Firebase Integration and expanding to other tabs!**

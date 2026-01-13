@@ -32,6 +32,7 @@ export default function Calendar() {
     new Map()
   );
   const [events, setEvents] = useState<GolfEvent[]>([]);
+  const [durationType, setDurationType] = useState<string>("custom");
 
   // Generate calendar days for current month
   const getDaysInMonth = () => {
@@ -198,7 +199,10 @@ export default function Calendar() {
 
               {/* Update Schedule Button */}
               <button
-                onClick={() => setShowUpdateSchedule(true)}
+                onClick={() => {
+                  setShowUpdateSchedule(true);
+                  setDurationType("custom");
+                }}
                 className="flex items-center gap-2 px-4 py-2 bg-gold text-white rounded-full hover:bg-gold-dark transition-colors shadow-soft"
               >
                 <svg
@@ -214,7 +218,7 @@ export default function Calendar() {
                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                   />
                 </svg>
-                <span className="font-medium">Update Schedule</span>
+                <span className="font-medium">Update Availability</span>
               </button>
 
               {/* Create Event Button */}
@@ -276,31 +280,29 @@ export default function Calendar() {
         ))}
       </div>
 
-      {/* Availability Selection Modal */}
+      {/* Day Card Selection Modal */}
       {selectedDay && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900">
-                  {selectedDay.toLocaleDateString("default", {
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Mark your availability for this day:
-                </p>
-              </div>
+            <div className="mb-4">
+              <h3 className="text-xl font-bold text-gray-900">
+                {selectedDay.toLocaleDateString("default", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </h3>
+            </div>
+
+            {/* Primary Action: Create Event */}
+            <div className="mb-6">
               <button
                 onClick={() => {
                   setShowCreateEvent(true);
                   setEventDate(selectedDay);
                   setSelectedDay(null);
                 }}
-                className="p-2 bg-navy text-white rounded-full hover:bg-navy-dark transition-colors flex-shrink-0"
-                title="Create Event"
+                className="w-full p-4 bg-navy text-white rounded-full hover:bg-navy-dark transition-colors flex items-center justify-center gap-2 shadow-soft"
               >
                 <svg
                   className="w-5 h-5"
@@ -315,62 +317,71 @@ export default function Calendar() {
                     d="M12 4v16m8-8H4"
                   />
                 </svg>
+                <span className="font-medium">Create Event</span>
               </button>
             </div>
-            <div className="space-y-3">
-              <button
-                onClick={() => handleAvailabilityChange(selectedDay, "full-day")}
-                className="w-full p-4 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
-              >
-                <span className="text-3xl mr-3">👍</span>
-                <div>
-                  <div className="font-semibold text-navy">All Day</div>
-                  <div className="text-sm text-warmgrey">Available anytime</div>
-                </div>
-              </button>
-              <button
-                onClick={() => handleAvailabilityChange(selectedDay, "morning")}
-                className="w-full p-4 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
-              >
-                <span className="text-3xl mr-3">🌅</span>
-                <div>
-                  <div className="font-semibold text-navy">Morning</div>
-                  <div className="text-sm text-warmgrey">Early tee time</div>
-                </div>
-              </button>
-              <button
-                onClick={() => handleAvailabilityChange(selectedDay, "midday")}
-                className="w-full p-4 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
-              >
-                <span className="text-3xl mr-3">☀️</span>
-                <div>
-                  <div className="font-semibold text-navy">Mid-day</div>
-                  <div className="text-sm text-warmgrey">Afternoon round</div>
-                </div>
-              </button>
-              <button
-                onClick={() =>
-                  handleAvailabilityChange(selectedDay, "afternoon")
-                }
-                className="w-full p-4 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
-              >
-                <span className="text-3xl mr-3">🌇</span>
-                <div>
-                  <div className="font-semibold text-navy">Afternoon</div>
-                  <div className="text-sm text-warmgrey">Evening tee time</div>
-                </div>
-              </button>
-              <button
-                onClick={() => handleAvailabilityChange(selectedDay, null)}
-                className="w-full p-4 bg-white border-2 border-gray-200 rounded-full hover:border-red-500 hover:bg-red-50 transition-all text-left flex items-center shadow-soft"
-              >
-                <span className="text-3xl mr-3">❌</span>
-                <div>
-                  <div className="font-semibold text-navy">Not Available</div>
-                  <div className="text-sm text-warmgrey">Clear availability</div>
-                </div>
-              </button>
+
+            {/* Secondary Action: Update Availability */}
+            <div>
+              <p className="text-sm text-gray-600 mb-3">
+                Or mark your availability:
+              </p>
+              <div className="space-y-2">
+                <button
+                  onClick={() => handleAvailabilityChange(selectedDay, "full-day")}
+                  className="w-full p-3 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
+                >
+                  <span className="text-2xl mr-3">👍</span>
+                  <div>
+                    <div className="font-semibold text-navy text-sm">All Day</div>
+                    <div className="text-xs text-warmgrey">Available anytime</div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => handleAvailabilityChange(selectedDay, "morning")}
+                  className="w-full p-3 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
+                >
+                  <span className="text-2xl mr-3">🌅</span>
+                  <div>
+                    <div className="font-semibold text-navy text-sm">Morning</div>
+                    <div className="text-xs text-warmgrey">Sunrise - 10:59 AM</div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => handleAvailabilityChange(selectedDay, "midday")}
+                  className="w-full p-3 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
+                >
+                  <span className="text-2xl mr-3">☀️</span>
+                  <div>
+                    <div className="font-semibold text-navy text-sm">Mid-day</div>
+                    <div className="text-xs text-warmgrey">11:00 AM - 2:59 PM</div>
+                  </div>
+                </button>
+                <button
+                  onClick={() =>
+                    handleAvailabilityChange(selectedDay, "afternoon")
+                  }
+                  className="w-full p-3 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
+                >
+                  <span className="text-2xl mr-3">🌇</span>
+                  <div>
+                    <div className="font-semibold text-navy text-sm">Afternoon</div>
+                    <div className="text-xs text-warmgrey">3:00 PM - Sunset</div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => handleAvailabilityChange(selectedDay, null)}
+                  className="w-full p-3 bg-white border-2 border-gray-200 rounded-full hover:border-red-500 hover:bg-red-50 transition-all text-left flex items-center shadow-soft"
+                >
+                  <span className="text-2xl mr-3">❌</span>
+                  <div>
+                    <div className="font-semibold text-navy text-sm">Not Available</div>
+                    <div className="text-xs text-warmgrey">Clear availability</div>
+                  </div>
+                </button>
+              </div>
             </div>
+
             <button
               onClick={() => setSelectedDay(null)}
               className="w-full mt-4 p-3 bg-warmgrey-light text-white rounded-full font-medium hover:bg-warmgrey transition-colors"
@@ -673,7 +684,7 @@ export default function Calendar() {
                       <select
                         name={day.id}
                         defaultValue="none"
-                        className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-full focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-navy bg-white"
+                        className="flex-1 pl-3 pr-8 py-2 text-sm border border-gray-200 rounded-full focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-navy bg-white appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTEgMSIgc3Ryb2tlPSIjNjY2IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px] bg-[right_0.75rem_center] bg-no-repeat"
                       >
                         <option value="none">Not Available</option>
                         <option value="full-day">All Day</option>
@@ -691,13 +702,14 @@ export default function Calendar() {
                 <h4 className="font-semibold text-navy mb-3">Duration</h4>
                 <div className="space-y-3">
                   {/* Custom Duration */}
-                  <label className="flex items-center p-3 bg-white border-2 border-gray-200 rounded-full hover:border-gold transition-all cursor-pointer">
+                  <label className={`flex items-center p-3 bg-white border-2 rounded-full hover:border-gold transition-all cursor-pointer ${durationType === "custom" ? "border-gold bg-cream-200" : "border-gray-200"}`}>
                     <input
                       type="radio"
                       name="durationType"
                       value="custom"
-                      defaultChecked
-                      className="mr-3 w-4 h-4 text-gold focus:ring-gold"
+                      checked={durationType === "custom"}
+                      onChange={(e) => setDurationType(e.target.value)}
+                      className="mr-3 w-4 h-4 text-gold focus:ring-gold accent-gold"
                     />
                     <span className="text-navy font-medium mr-2">Next</span>
                     <input
@@ -706,19 +718,13 @@ export default function Calendar() {
                       min="1"
                       defaultValue="4"
                       className="w-16 px-2 py-1 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent text-navy"
-                      onClick={(e) => {
-                        const radio = e.currentTarget.parentElement?.querySelector('input[type="radio"]') as HTMLInputElement;
-                        if (radio) radio.checked = true;
-                      }}
+                      onClick={() => setDurationType("custom")}
                     />
                     <select
                       name="durationUnit"
                       defaultValue="weeks"
                       className="ml-2 px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent text-navy bg-white"
-                      onClick={(e) => {
-                        const radio = e.currentTarget.parentElement?.querySelector('input[type="radio"]') as HTMLInputElement;
-                        if (radio) radio.checked = true;
-                      }}
+                      onClick={() => setDurationType("custom")}
                     >
                       <option value="days">Days</option>
                       <option value="weeks">Weeks</option>
@@ -727,12 +733,14 @@ export default function Calendar() {
                   </label>
 
                   {/* Indefinitely */}
-                  <label className="flex items-center p-3 bg-white border-2 border-gray-200 rounded-full hover:border-gold transition-all cursor-pointer">
+                  <label className={`flex items-center p-3 bg-white border-2 rounded-full hover:border-gold transition-all cursor-pointer ${durationType === "indefinitely" ? "border-gold bg-cream-200" : "border-gray-200"}`}>
                     <input
                       type="radio"
                       name="durationType"
                       value="indefinitely"
-                      className="mr-3 w-4 h-4 text-gold focus:ring-gold"
+                      checked={durationType === "indefinitely"}
+                      onChange={(e) => setDurationType(e.target.value)}
+                      className="mr-3 w-4 h-4 text-gold focus:ring-gold accent-gold"
                     />
                     <span className="text-navy font-medium">Indefinitely</span>
                   </label>

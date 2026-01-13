@@ -11,10 +11,10 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { id: "messages", label: "Messages", icon: "💬" },
-  { id: "play-now", label: "Play Now", icon: "⛳" },
+  { id: "play-now", label: "Course Search", icon: "⛳" },
   { id: "calendar", label: "Calendar", icon: "📅" },
   { id: "friends", label: "Friends", icon: "👥" },
-  { id: "profile", label: "Profile", icon: "🙍" },
+  { id: "profile", label: "Profile", icon: "👤" },
 ];
 
 export default function BottomNav({ activeTab, setActiveTab }: BottomNavProps) {
