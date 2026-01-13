@@ -1,0 +1,3 @@
+This is a placeholder file.
+To add a proper PWA icon, replace this with a 192x192 PNG image named icon-192.png
+You can create a simple golf-themed icon using any image editor or online tool.
