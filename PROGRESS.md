@@ -1,7 +1,7 @@
 # GolfGrid - Development Progress Log
 
-**Last Updated:** January 13, 2026 (Evening)
-**Status:** UI Refinements Complete - Day Card Modal Restructured - Course Search Tab Renamed
+**Last Updated:** January 15, 2026
+**Status:** Event Management Complete - Create Event Primary Flow - View/Edit Events - Modern Event Cards
 
 ---
 
@@ -49,28 +49,57 @@
   - Start date selection (won't override existing availability)
   - Batch apply availability patterns (e.g., "Monday mornings, Tuesday all day")
 
-#### Event Creation System
-- ✅ **"Create Event" button** in calendar header (green button)
-- ✅ **+ button** in day availability modal
+#### Event Creation System (ENHANCED - January 15, 2026)
+- ✅ **"Create Event" button** in calendar header (navy button)
+- ✅ **Day card click workflow**:
+  - **No event:** Shows Create Event form first (primary action)
+  - **Has event:** Shows Event Details modal for viewing/editing
 - ✅ **Full event creation form** with:
   - Golf course name (required, dark text for readability)
   - Tee time picker (datetime-local input)
   - Invite friends field (placeholder for now)
+  - **3 profile icon placeholders** below invite field (for future friend invites)
+- ✅ **"Update Availability" button** (secondary action) - toggles to availability options
 - ✅ Events saved to local state (ready for Firebase)
 
-#### Event Display on Calendar
-- ✅ **Color-coded event boxes** with gradients:
-  - 🟠 **Orange** (7am-11am): Morning tee times
-  - 🔵 **Blue** (11am-2pm): Mid-day tee times
-  - 🟣 **Purple** (2pm-8pm): Afternoon tee times
+#### Event Management System (NEW - January 15, 2026)
+- ✅ **View Event Details** when clicking day with existing event:
+  - Golf course name displayed
+  - Tee time in 12-hour format
+  - 3 player slot indicators
+  - Invited friends list
+- ✅ **Edit Event** functionality:
+  - Full editing form with pre-populated data
+  - Update course name, tee time, and invited friends
+  - Save changes or cancel to return to view mode
+- ✅ **Cancel Event** with confirmation dialog:
+  - "Are you sure?" prompt to prevent accidental deletion
+  - Removes event from calendar
+  - (Future: differentiate between "Cancel Event" for creators and "Leave Event" for joiners)
+- ✅ **Clear All Availability** option:
+  - Located inside Update Availability modal at bottom
+  - Separate confirmation dialog with warning icon
+  - Clears all marked availability from calendar
+  - Protection against accidental "fat thumb" clearing
+
+#### Event Display on Calendar (REDESIGNED - January 15, 2026)
+- ✅ **Modern, minimal event cards** with soft color scheme:
+  - 🟠 **Orange tint** (7am-11am): Morning tee times
+  - 🔵 **Blue tint** (11am-2pm): Mid-day tee times
+  - 🟣 **Purple tint** (2pm-8pm): Afternoon tee times
   - ⚪ **White** (outside times): Other tee times
-- ✅ **Smart positioning** based on tee time:
-  - Morning events: 40% from top
-  - Mid-day events: 50% from top
-  - Afternoon events: 60% from top (leaves 10% grey showing)
-- ✅ Events take up 30% of day card height
-- ✅ **Course name + time** displayed in each event box
-- ✅ Multiple events per day supported (slightly offset)
+- ✅ **Unified card positioning**:
+  - All events centered vertically (removed time-based positioning)
+  - Larger card size with better padding
+  - Soft borders and shadows for depth
+- ✅ **Event card content**:
+  - Course name (bold, truncated if needed)
+  - Tee time in 12-hour format
+  - 3 profile icon placeholders for players
+- ✅ **Multiple events indicator**:
+  - Shows first event in full
+  - "+X more" label if multiple events on same day
+- ✅ **Hover effects** for better interactivity
 - ✅ **Day card auto-updates** to white background when event is added
 
 #### Country Club Design System (COMPLETED)
@@ -611,6 +640,12 @@ npm start
 16. **Mobile-friendly** - Gold highlighting on selected duration options for clear feedback
 17. **Clear time ranges** - Specific time descriptions (e.g., "Sunrise - 10:59 AM")
 18. **Course Search** - Renamed "Play Now" tab to "Course Search" for clarity
+19. **Event-first workflow** - Create Event form appears immediately when clicking empty days
+20. **Profile placeholders** - 3 player icon slots shown in event creation and on calendar cards
+21. **View/Edit flow** - Click event days to view details, edit, or cancel
+22. **Modern event cards** - Centered positioning with soft colors, larger size, better spacing
+23. **Smart override** - Update Availability properly handles "Not Available" selections
+24. **Protected clearing** - Clear All Availability requires confirmation to prevent accidents
 
 ### Known Limitations (To Fix with Firebase):
 - Events don't persist on refresh
@@ -630,19 +665,29 @@ npm start
 ## ✨ What You Can Demo Right Now
 
 1. **Navigate months** with pill-shaped arrow buttons (navy hover states)
-2. **Click any future day** to see restructured modal:
-   - **Primary action:** "Create Event" button prominently displayed at top
-   - **Secondary actions:** Availability options below with clear time ranges
-   - Time descriptions: "Sunrise - 10:59 AM", "11:00 AM - 2:59 PM", "3:00 PM - Sunset"
-3. **Mark availability** (All Day, Morning, Mid-day, Afternoon)
-4. **See colored borders** appear on day cards based on availability type
+2. **Click any future day without events**:
+   - See Create Event form as primary interface
+   - Enter golf course name, tee time, and invite friends
+   - View 3 profile icon placeholders for future player invites
+   - Click "Update Availability" to switch to availability marking
+3. **Click a day with existing event**:
+   - View full event details (course, time, players)
+   - Edit event information
+   - Cancel event with confirmation
+4. **Mark availability** (All Day, Morning, Mid-day, Afternoon):
+   - See colored borders appear on day cards
+   - "Not Available" option now properly clears availability
 5. **Use Update Availability** to set recurring weekly patterns (gold button):
-   - Select availability for each day of week (Sun-Sat) with improved dropdown chevrons
+   - Select availability for each day of week (Sun-Sat)
    - Choose custom duration (X days/weeks/months) or indefinitely
-   - **Gold highlighting** on selected duration option for clear feedback
-   - Set start date to avoid overriding existing availability
-6. **Create golf events** with course names and tee times (navy button)
-7. **See events** display with color-coded gradients (orange/blue/purple)
+   - **Clear All Availability** button at bottom with confirmation dialog
+   - Set start date and override existing schedules
+6. **Create golf events** from header or day cards (navy button):
+   - Events display as modern cards on calendar days
+   - Color-coded by tee time (orange/blue/purple tints)
+   - Shows course name, tee time, and 3 player icons
+   - Multiple events show "+X more" indicator
+7. **View and edit events** by clicking days with scheduled events
 8. **View help guide** by clicking the ? icon
 9. **Switch tabs** using bottom navigation with gold pill indicator
 10. **Navigate to Course Search** tab (renamed from "Play Now")
@@ -680,24 +725,40 @@ npm start
 
 ---
 
-**🎉 Incredible progress! The Calendar features a stunning country club design with recurring availability management! 🏌️**
+**🎉 Massive progress! Event management system complete with modern card design and full CRUD operations! 🏌️**
 
-**🌟 Recent Accomplishments (January 13, 2026 - Evening Session):**
-- ✅ Day card modal restructured with clear action hierarchy (Create Event primary, Update Availability secondary)
-- ✅ Button text updated from "Update Schedule" to "Update Availability" for clarity
-- ✅ Gold highlighting on selected duration options for better mobile UX
-- ✅ Chevron icon positioning improved on day-of-week select dropdowns
-- ✅ Time slot descriptions updated with specific time ranges (Sunrise - 10:59 AM, etc.)
-- ✅ Bottom navigation updated: "Play Now" → "Course Search"
-- ✅ Profile icon updated to standard silhouette (👤) for more polished look
-- ✅ All UI refinements committed to GitHub
+**🌟 Recent Accomplishments (January 15, 2026):**
 
-**Previous Session Accomplishments:**
+### Event Management Features:
+- ✅ **Create Event as primary action** - Form appears immediately when clicking empty days
+- ✅ **3 profile icon placeholders** added to all Create Event forms and calendar event cards
+- ✅ **View Event Details modal** - Click days with events to view full details
+- ✅ **Edit Event functionality** - Full editing form with pre-populated data
+- ✅ **Cancel Event** with confirmation dialog to prevent accidental deletion
+- ✅ **Day card workflow** - Smart detection shows Create Event or Event Details based on day state
+
+### UI/UX Improvements:
+- ✅ **Modern event cards** redesigned with:
+  - Soft color tints (orange/blue/purple) replacing gradients
+  - Unified centered positioning (removed time-based vertical alignment)
+  - Larger card size with better padding and spacing
+  - Course name, tee time, and 3 player icons displayed
+  - Hover effects for better interactivity
+- ✅ **"Update Availability" button** moved from primary to secondary action in day modal
+- ✅ **Multiple events indicator** - Shows "+X more" when multiple events on same day
+
+### Availability Management:
+- ✅ **Fixed override logic** - "Not Available" selections now properly clear existing availability
+- ✅ **Clear All Availability** button added inside Update Availability modal
+- ✅ **Confirmation dialog** with warning icon protects against accidental clearing
+- ✅ **All changes committed to GitHub**
+
+**Previous Session Accomplishments (January 13, 2026):**
 - ✅ Country club design system (cream, navy, gold) fully implemented
 - ✅ Premium typography (Merriweather + Inter from Google Fonts)
 - ✅ Recurring availability scheduler with customizable duration
 - ✅ Colored border indicators for availability types
 - ✅ Minimal, elegant UI with pill-shaped buttons
-- ✅ Fixed bottom nav overlap issue
+- ✅ Day card modal restructured with action hierarchy
 
-**🚀 Ready for Firebase Integration and expanding to other tabs!**
+**🚀 Event system ready! Next: Firebase Integration for persistence and authentication!**

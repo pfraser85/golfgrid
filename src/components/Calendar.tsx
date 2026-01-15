@@ -33,6 +33,10 @@ export default function Calendar() {
   );
   const [events, setEvents] = useState<GolfEvent[]>([]);
   const [durationType, setDurationType] = useState<string>("custom");
+  const [showAvailabilityInDayCard, setShowAvailabilityInDayCard] = useState(false);
+  const [viewingEvent, setViewingEvent] = useState<GolfEvent | null>(null);
+  const [editingEvent, setEditingEvent] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   // Generate calendar days for current month
   const getDaysInMonth = () => {
@@ -59,7 +63,17 @@ export default function Calendar() {
   };
 
   const handleDayClick = (date: Date) => {
-    setSelectedDay(date);
+    // Check if there are events on this day
+    const dayEvents = getEventsForDate(date);
+
+    if (dayEvents.length > 0) {
+      // Show the first event (can be extended to show multiple)
+      setViewingEvent(dayEvents[0]);
+    } else {
+      // No events, show create event form
+      setSelectedDay(date);
+      setShowAvailabilityInDayCard(false);
+    }
   };
 
   const handleAvailabilityChange = (date: Date, type: AvailabilityType) => {
@@ -108,6 +122,39 @@ export default function Calendar() {
 
     setEvents([...events, newEvent]);
     setShowCreateEvent(false);
+  };
+
+  const handleCancelEvent = (eventId: string) => {
+    setEvents(events.filter(event => event.id !== eventId));
+    setViewingEvent(null);
+  };
+
+  const handleUpdateEvent = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!viewingEvent) return;
+
+    const formData = new FormData(e.currentTarget);
+    const courseName = formData.get("courseName") as string;
+    const dateTimeStr = formData.get("dateTime") as string;
+    const invitedFriends = formData.get("invitedFriends") as string;
+
+    const updatedEvent: GolfEvent = {
+      ...viewingEvent,
+      courseName,
+      dateTime: new Date(dateTimeStr),
+      invitedFriends: invitedFriends || undefined,
+    };
+
+    setEvents(events.map(event =>
+      event.id === viewingEvent.id ? updatedEvent : event
+    ));
+    setViewingEvent(null);
+    setEditingEvent(false);
+  };
+
+  const handleClearAllAvailability = () => {
+    setAvailability(new Map());
+    setShowClearConfirm(false);
   };
 
   const goToPreviousMonth = () => {
@@ -283,9 +330,9 @@ export default function Calendar() {
       {/* Day Card Selection Modal */}
       {selectedDay && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
-            <div className="mb-4">
-              <h3 className="text-xl font-bold text-gray-900">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="mb-6">
+              <h3 className="text-2xl font-bold text-navy">
                 {selectedDay.toLocaleDateString("default", {
                   month: "long",
                   day: "numeric",
@@ -294,100 +341,225 @@ export default function Calendar() {
               </h3>
             </div>
 
-            {/* Primary Action: Create Event */}
-            <div className="mb-6">
-              <button
-                onClick={() => {
-                  setShowCreateEvent(true);
-                  setEventDate(selectedDay);
+            {!showAvailabilityInDayCard ? (
+              /* Create Event Form */
+              <form
+                className="space-y-5"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  const courseName = formData.get("courseName") as string;
+                  const dateTimeStr = formData.get("dateTime") as string;
+                  const invitedFriends = formData.get("invitedFriends") as string;
+
+                  const newEvent: GolfEvent = {
+                    id: Date.now().toString(),
+                    courseName,
+                    dateTime: new Date(dateTimeStr),
+                    invitedFriends: invitedFriends || undefined,
+                  };
+
+                  setEvents([...events, newEvent]);
                   setSelectedDay(null);
                 }}
-                className="w-full p-4 bg-navy text-white rounded-full hover:bg-navy-dark transition-colors flex items-center justify-center gap-2 shadow-soft"
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4v16m8-8H4"
+                {/* Golf Course Name */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Golf Course Name
+                  </label>
+                  <input
+                    type="text"
+                    name="courseName"
+                    required
+                    placeholder="e.g., Pebble Beach Golf Links"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-gray-900 placeholder-gray-400"
                   />
-                </svg>
-                <span className="font-medium">Create Event</span>
-              </button>
-            </div>
+                </div>
 
-            {/* Secondary Action: Update Availability */}
-            <div>
-              <p className="text-sm text-gray-600 mb-3">
-                Or mark your availability:
-              </p>
-              <div className="space-y-2">
-                <button
-                  onClick={() => handleAvailabilityChange(selectedDay, "full-day")}
-                  className="w-full p-3 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
-                >
-                  <span className="text-2xl mr-3">👍</span>
-                  <div>
-                    <div className="font-semibold text-navy text-sm">All Day</div>
-                    <div className="text-xs text-warmgrey">Available anytime</div>
+                {/* Date and Time */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Tee Time (Date & Time)
+                  </label>
+                  <input
+                    type="datetime-local"
+                    name="dateTime"
+                    required
+                    defaultValue={selectedDay.toISOString().slice(0, 16)}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-gray-900"
+                  />
+                </div>
+
+                {/* Invite Friends */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Invite Friends (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    name="invitedFriends"
+                    placeholder="Search friends to invite..."
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-gray-900 placeholder-gray-400"
+                  />
+
+                  {/* Profile Icon Placeholders */}
+                  <div className="flex items-center gap-3 mt-3">
+                    {[1, 2, 3].map((slot) => (
+                      <div
+                        key={slot}
+                        className="w-12 h-12 rounded-full border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center transition-all hover:border-gold hover:bg-cream-200"
+                        title={`Player ${slot + 1} slot`}
+                      >
+                        <svg
+                          className="w-6 h-6 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                          />
+                        </svg>
+                      </div>
+                    ))}
                   </div>
+
+                  <p className="text-xs text-gray-500 mt-2">
+                    Friend search will be available after Firebase setup
+                  </p>
+                </div>
+
+                {/* Create Event Button */}
+                <button
+                  type="submit"
+                  className="w-full px-4 py-3 bg-navy text-white rounded-full font-medium hover:bg-navy-dark transition-colors shadow-soft"
+                >
+                  Create Event
                 </button>
-                <button
-                  onClick={() => handleAvailabilityChange(selectedDay, "morning")}
-                  className="w-full p-3 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
-                >
-                  <span className="text-2xl mr-3">🌅</span>
-                  <div>
-                    <div className="font-semibold text-navy text-sm">Morning</div>
-                    <div className="text-xs text-warmgrey">Sunrise - 10:59 AM</div>
+
+                {/* Divider */}
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-200"></div>
                   </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-white text-warmgrey">or</span>
+                  </div>
+                </div>
+
+                {/* Update Availability Button */}
+                <button
+                  type="button"
+                  onClick={() => setShowAvailabilityInDayCard(true)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gold text-white rounded-full font-medium hover:bg-gold-dark transition-colors shadow-soft"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span>Update Availability</span>
                 </button>
+
+                {/* Cancel Button */}
                 <button
-                  onClick={() => handleAvailabilityChange(selectedDay, "midday")}
-                  className="w-full p-3 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
+                  type="button"
+                  onClick={() => setSelectedDay(null)}
+                  className="w-full px-4 py-3 bg-warmgrey-light text-white rounded-full font-medium hover:bg-warmgrey transition-colors"
                 >
-                  <span className="text-2xl mr-3">☀️</span>
-                  <div>
-                    <div className="font-semibold text-navy text-sm">Mid-day</div>
-                    <div className="text-xs text-warmgrey">11:00 AM - 2:59 PM</div>
-                  </div>
+                  Cancel
                 </button>
+              </form>
+            ) : (
+              /* Availability Selection */
+              <div>
+                <p className="text-sm text-warmgrey mb-4">
+                  Mark your availability for this day:
+                </p>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => handleAvailabilityChange(selectedDay, "full-day")}
+                    className="w-full p-3 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
+                  >
+                    <span className="text-2xl mr-3">👍</span>
+                    <div>
+                      <div className="font-semibold text-navy text-sm">All Day</div>
+                      <div className="text-xs text-warmgrey">Available anytime</div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => handleAvailabilityChange(selectedDay, "morning")}
+                    className="w-full p-3 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
+                  >
+                    <span className="text-2xl mr-3">🌅</span>
+                    <div>
+                      <div className="font-semibold text-navy text-sm">Morning</div>
+                      <div className="text-xs text-warmgrey">Sunrise - 10:59 AM</div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => handleAvailabilityChange(selectedDay, "midday")}
+                    className="w-full p-3 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
+                  >
+                    <span className="text-2xl mr-3">☀️</span>
+                    <div>
+                      <div className="font-semibold text-navy text-sm">Mid-day</div>
+                      <div className="text-xs text-warmgrey">11:00 AM - 2:59 PM</div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() =>
+                      handleAvailabilityChange(selectedDay, "afternoon")
+                    }
+                    className="w-full p-3 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
+                  >
+                    <span className="text-2xl mr-3">🌇</span>
+                    <div>
+                      <div className="font-semibold text-navy text-sm">Afternoon</div>
+                      <div className="text-xs text-warmgrey">3:00 PM - Sunset</div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => handleAvailabilityChange(selectedDay, null)}
+                    className="w-full p-3 bg-white border-2 border-gray-200 rounded-full hover:border-red-500 hover:bg-red-50 transition-all text-left flex items-center shadow-soft"
+                  >
+                    <span className="text-2xl mr-3">❌</span>
+                    <div>
+                      <div className="font-semibold text-navy text-sm">Not Available</div>
+                      <div className="text-xs text-warmgrey">Clear availability</div>
+                    </div>
+                  </button>
+                </div>
+
+                {/* Back Button */}
                 <button
-                  onClick={() =>
-                    handleAvailabilityChange(selectedDay, "afternoon")
-                  }
-                  className="w-full p-3 bg-white border-2 border-gray-200 rounded-full hover:border-gold hover:bg-cream-200 transition-all text-left flex items-center shadow-soft"
+                  onClick={() => setShowAvailabilityInDayCard(false)}
+                  className="w-full mt-4 p-3 bg-cream-200 text-navy rounded-full font-medium hover:bg-gray-200 transition-colors"
                 >
-                  <span className="text-2xl mr-3">🌇</span>
-                  <div>
-                    <div className="font-semibold text-navy text-sm">Afternoon</div>
-                    <div className="text-xs text-warmgrey">3:00 PM - Sunset</div>
-                  </div>
+                  Back to Create Event
                 </button>
+
+                {/* Cancel Button */}
                 <button
-                  onClick={() => handleAvailabilityChange(selectedDay, null)}
-                  className="w-full p-3 bg-white border-2 border-gray-200 rounded-full hover:border-red-500 hover:bg-red-50 transition-all text-left flex items-center shadow-soft"
+                  onClick={() => setSelectedDay(null)}
+                  className="w-full mt-2 p-3 bg-warmgrey-light text-white rounded-full font-medium hover:bg-warmgrey transition-colors"
                 >
-                  <span className="text-2xl mr-3">❌</span>
-                  <div>
-                    <div className="font-semibold text-navy text-sm">Not Available</div>
-                    <div className="text-xs text-warmgrey">Clear availability</div>
-                  </div>
+                  Cancel
                 </button>
               </div>
-            </div>
-
-            <button
-              onClick={() => setSelectedDay(null)}
-              className="w-full mt-4 p-3 bg-warmgrey-light text-white rounded-full font-medium hover:bg-warmgrey transition-colors"
-            >
-              Cancel
-            </button>
+            )}
           </div>
         </div>
       )}
@@ -436,8 +608,34 @@ export default function Calendar() {
                   type="text"
                   name="invitedFriends"
                   placeholder="Search friends to invite..."
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-gray-900 placeholder-gray-400"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-gray-900 placeholder-gray-400"
                 />
+
+                {/* Profile Icon Placeholders */}
+                <div className="flex items-center gap-3 mt-3">
+                  {[1, 2, 3].map((slot) => (
+                    <div
+                      key={slot}
+                      className="w-12 h-12 rounded-full border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center transition-all hover:border-gold hover:bg-cream-200"
+                      title={`Player ${slot + 1} slot`}
+                    >
+                      <svg
+                        className="w-6 h-6 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                    </div>
+                  ))}
+                </div>
+
                 <p className="text-xs text-gray-500 mt-2">
                   Friend search will be available after Firebase setup
                 </p>
@@ -632,10 +830,14 @@ export default function Calendar() {
 
                 while (currentDateIter <= endDate) {
                   const dayOfWeek = daysOfWeek[currentDateIter.getDay()];
-                  const availabilityType = formData.get(dayOfWeek) as AvailabilityType;
+                  const availabilityType = formData.get(dayOfWeek) as AvailabilityType | "none";
+                  const dateKey = currentDateIter.toISOString().split("T")[0];
 
-                  if (availabilityType && availabilityType !== "none") {
-                    const dateKey = currentDateIter.toISOString().split("T")[0];
+                  if (availabilityType === "none") {
+                    // Remove availability for this date
+                    newAvailability.delete(dateKey);
+                  } else if (availabilityType) {
+                    // Set availability for this date
                     newAvailability.set(dateKey, {
                       date: new Date(currentDateIter),
                       availability: availabilityType,
@@ -763,7 +965,278 @@ export default function Calendar() {
                   Apply Schedule
                 </button>
               </div>
+
+              {/* Clear All Availability Button */}
+              <div className="pt-4 mt-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowUpdateSchedule(false);
+                    setShowClearConfirm(true);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
+                  <span className="font-medium">Clear All Availability</span>
+                </button>
+              </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* View/Edit Event Modal */}
+      {viewingEvent && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="mb-6">
+              <h3 className="text-2xl font-bold text-navy">
+                {editingEvent ? "Edit Event" : "Event Details"}
+              </h3>
+              <p className="text-sm text-warmgrey mt-1">
+                {viewingEvent.dateTime.toLocaleDateString("default", {
+                  weekday: "long",
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </p>
+            </div>
+
+            {!editingEvent ? (
+              /* View Mode */
+              <div className="space-y-5">
+                {/* Course Name */}
+                <div>
+                  <label className="block text-xs font-semibold text-warmgrey mb-1 uppercase tracking-wide">
+                    Golf Course
+                  </label>
+                  <div className="text-lg font-bold text-navy">
+                    {viewingEvent.courseName}
+                  </div>
+                </div>
+
+                {/* Tee Time */}
+                <div>
+                  <label className="block text-xs font-semibold text-warmgrey mb-1 uppercase tracking-wide">
+                    Tee Time
+                  </label>
+                  <div className="text-lg font-bold text-navy">
+                    {viewingEvent.dateTime.toLocaleTimeString([], {
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true
+                    })}
+                  </div>
+                </div>
+
+                {/* Players */}
+                <div>
+                  <label className="block text-xs font-semibold text-warmgrey mb-2 uppercase tracking-wide">
+                    Players
+                  </label>
+                  <div className="flex items-center gap-3">
+                    {[1, 2, 3].map((slot) => (
+                      <div
+                        key={slot}
+                        className="w-12 h-12 rounded-full border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center"
+                      >
+                        <svg
+                          className="w-6 h-6 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                          />
+                        </svg>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-warmgrey mt-2">
+                    {viewingEvent.invitedFriends || "No friends invited yet"}
+                  </p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="space-y-3 pt-4">
+                  <button
+                    onClick={() => setEditingEvent(true)}
+                    className="w-full px-4 py-3 bg-navy text-white rounded-full font-medium hover:bg-navy-dark transition-colors shadow-soft"
+                  >
+                    Edit Event
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      if (window.confirm("Are you sure you want to cancel this event?")) {
+                        handleCancelEvent(viewingEvent.id);
+                      }
+                    }}
+                    className="w-full px-4 py-3 bg-red-500 text-white rounded-full font-medium hover:bg-red-600 transition-colors shadow-soft"
+                  >
+                    Cancel Event
+                  </button>
+
+                  <button
+                    onClick={() => setViewingEvent(null)}
+                    className="w-full px-4 py-3 bg-warmgrey-light text-white rounded-full font-medium hover:bg-warmgrey transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* Edit Mode */
+              <form className="space-y-5" onSubmit={handleUpdateEvent}>
+                {/* Golf Course Name */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Golf Course Name
+                  </label>
+                  <input
+                    type="text"
+                    name="courseName"
+                    required
+                    defaultValue={viewingEvent.courseName}
+                    placeholder="e.g., Pebble Beach Golf Links"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-gray-900 placeholder-gray-400"
+                  />
+                </div>
+
+                {/* Date and Time */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Tee Time (Date & Time)
+                  </label>
+                  <input
+                    type="datetime-local"
+                    name="dateTime"
+                    required
+                    defaultValue={viewingEvent.dateTime.toISOString().slice(0, 16)}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-gray-900"
+                  />
+                </div>
+
+                {/* Invite Friends */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Invite Friends (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    name="invitedFriends"
+                    defaultValue={viewingEvent.invitedFriends || ""}
+                    placeholder="Search friends to invite..."
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-gray-900 placeholder-gray-400"
+                  />
+
+                  {/* Profile Icon Placeholders */}
+                  <div className="flex items-center gap-3 mt-3">
+                    {[1, 2, 3].map((slot) => (
+                      <div
+                        key={slot}
+                        className="w-12 h-12 rounded-full border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center transition-all hover:border-gold hover:bg-cream-200"
+                        title={`Player ${slot + 1} slot`}
+                      >
+                        <svg
+                          className="w-6 h-6 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                          />
+                        </svg>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Buttons */}
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingEvent(false)}
+                    className="flex-1 px-4 py-3 bg-cream-200 text-navy rounded-full font-medium hover:bg-gray-200 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-3 bg-navy text-white rounded-full font-medium hover:bg-navy-dark transition-colors shadow-soft"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Clear Availability Confirmation Modal */}
+      {showClearConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+            <div className="mb-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg
+                  className="w-6 h-6 text-red-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-navy text-center mb-2">
+                Clear All Availability?
+              </h3>
+              <p className="text-sm text-warmgrey text-center">
+                This will remove all your marked availability from the calendar. This action cannot be undone.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={handleClearAllAvailability}
+                className="w-full px-4 py-3 bg-red-500 text-white rounded-full font-medium hover:bg-red-600 transition-colors shadow-soft"
+              >
+                Yes, Clear All
+              </button>
+              <button
+                onClick={() => setShowClearConfirm(false)}
+                className="w-full px-4 py-3 bg-warmgrey-light text-white rounded-full font-medium hover:bg-warmgrey transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}

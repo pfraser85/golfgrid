@@ -114,48 +114,42 @@ export default function DayTile({
     return icons;
   };
 
-  // Get event gradient color based on tee time
-  const getEventGradient = (eventTime: Date) => {
+  // Get event color based on tee time
+  const getEventColor = (eventTime: Date) => {
     const hour = eventTime.getHours();
     const minute = eventTime.getMinutes();
     const totalMinutes = hour * 60 + minute;
 
     // Morning: 7:00 AM - 10:59:59 AM (420-659 minutes)
     if (totalMinutes >= 420 && totalMinutes < 660) {
-      return "bg-gradient-to-br from-orange-200 to-orange-400";
+      return {
+        bg: "bg-orange-50",
+        border: "border-orange-300",
+        text: "text-orange-900"
+      };
     }
     // Mid-day: 11:00 AM - 1:59:59 PM (660-839 minutes)
     else if (totalMinutes >= 660 && totalMinutes < 840) {
-      return "bg-gradient-to-br from-blue-200 to-blue-400";
+      return {
+        bg: "bg-blue-50",
+        border: "border-blue-300",
+        text: "text-blue-900"
+      };
     }
     // Afternoon: 2:00 PM - 8:00 PM (840-1200 minutes)
     else if (totalMinutes >= 840 && totalMinutes <= 1200) {
-      return "bg-gradient-to-br from-purple-200 to-purple-400";
+      return {
+        bg: "bg-purple-50",
+        border: "border-purple-300",
+        text: "text-purple-900"
+      };
     }
     // Outside standard times
-    return "bg-white border border-gray-300";
-  };
-
-  // Get vertical position based on time of day
-  const getEventPosition = (eventTime: Date) => {
-    const hour = eventTime.getHours();
-    const minute = eventTime.getMinutes();
-    const totalMinutes = hour * 60 + minute;
-
-    // Morning (7-11am): middle of day box (around 40%)
-    if (totalMinutes >= 420 && totalMinutes < 660) {
-      return "top-[40%]";
-    }
-    // Mid-day (11am-2pm): lower middle (around 50%)
-    else if (totalMinutes >= 660 && totalMinutes < 840) {
-      return "top-[50%]";
-    }
-    // Afternoon (2-8pm): towards bottom but leave 10% grey showing
-    else if (totalMinutes >= 840 && totalMinutes <= 1200) {
-      return "top-[60%]";
-    }
-    // Default positioning for outside times
-    return "top-[50%]";
+    return {
+      bg: "bg-white",
+      border: "border-gray-300",
+      text: "text-gray-900"
+    };
   };
 
   const actionIcons = getActionIcons();
@@ -177,33 +171,67 @@ export default function DayTile({
         ${isToday ? "ring-2 ring-navy" : ""}
       `}
     >
-      {/* Event boxes */}
+      {/* Event cards */}
       {events.length > 0 && (
-        <div className="absolute inset-0 p-1">
-          {events.map((event, index) => (
-            <div
-              key={event.id}
-              className={`
-                absolute left-1 right-1 h-[30%] rounded-lg shadow-sm
-                ${getEventGradient(event.dateTime)}
-                ${getEventPosition(event.dateTime)}
-                flex flex-col items-center justify-center
-                px-1 py-0.5
-                z-10
-              `}
-              style={{
-                marginLeft: index > 0 ? `${index * 2}px` : "0",
-              }}
-              title={`${event.courseName} - ${event.dateTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
-            >
-              <span className="text-xs font-semibold text-gray-800 truncate w-full text-center leading-tight">
-                {event.courseName}
-              </span>
-              <span className="text-[10px] font-medium text-gray-700 mt-0.5">
-                {event.dateTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
-              </span>
+        <div className="absolute inset-0 p-1.5 flex flex-col justify-center">
+          {events.slice(0, 1).map((event) => {
+            const colors = getEventColor(event.dateTime);
+            return (
+              <div
+                key={event.id}
+                className={`
+                  ${colors.bg} ${colors.border}
+                  border-2 rounded-xl shadow-soft p-2
+                  flex flex-col gap-1.5
+                  transition-all hover:shadow-soft-lg
+                `}
+                title={`${event.courseName} - ${event.dateTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+              >
+                {/* Course Name */}
+                <div className={`text-xs font-bold ${colors.text} truncate leading-tight`}>
+                  {event.courseName}
+                </div>
+
+                {/* Tee Time */}
+                <div className={`text-[10px] font-semibold ${colors.text} opacity-80`}>
+                  {event.dateTime.toLocaleTimeString([], {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                  })}
+                </div>
+
+                {/* Profile Icons */}
+                <div className="flex items-center gap-1 mt-0.5">
+                  {[1, 2, 3].map((slot) => (
+                    <div
+                      key={slot}
+                      className={`w-5 h-5 rounded-full border ${colors.border} ${colors.bg} flex items-center justify-center`}
+                    >
+                      <svg
+                        className={`w-3 h-3 ${colors.text} opacity-40`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+          {events.length > 1 && (
+            <div className="text-[9px] text-warmgrey font-medium text-center mt-1">
+              +{events.length - 1} more
             </div>
-          ))}
+          )}
         </div>
       )}
 
