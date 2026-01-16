@@ -1,57 +1,86 @@
+"use client";
+
+import { useAuth } from "@/contexts/AuthContext";
+
 export default function Profile() {
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
+  // Get user metadata
+  const fullName = user?.user_metadata?.full_name || "User";
+  const email = user?.email || "";
+
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Profile</h1>
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex flex-col items-center mb-6">
-          <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center text-4xl mb-3">
-            👤
-          </div>
-          <button className="text-sm text-primary-600 hover:text-primary-700 font-medium">
-            Upload Photo
-          </button>
+    <div className="min-h-screen bg-cream-100">
+      <div className="max-w-2xl mx-auto p-6">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-navy mb-2">Profile</h1>
+          <p className="text-gray-600">Manage your GolfGrid account</p>
         </div>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Name
-            </label>
-            <input
-              type="text"
-              placeholder="Your name"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            />
+
+        {/* Profile Card */}
+        <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-8">
+          {/* Profile Picture Section */}
+          <div className="flex flex-col items-center mb-8 pb-8 border-b border-gray-200">
+            <div className="w-32 h-32 bg-gradient-to-br from-gold to-gold/70 rounded-full flex items-center justify-center text-6xl mb-4 shadow-lg">
+              ⛳
+            </div>
+            <h2 className="text-2xl font-bold text-navy mb-1">{fullName}</h2>
+            <p className="text-gray-600">{email}</p>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              placeholder="your@email.com"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            />
+
+          {/* Account Information */}
+          <div className="space-y-6 mb-8">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Full Name
+              </label>
+              <div className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900">
+                {fullName}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Email Address
+              </label>
+              <div className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900">
+                {email}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                User ID
+              </label>
+              <div className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-600 text-sm font-mono break-all">
+                {user?.id}
+              </div>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Handicap
-            </label>
-            <input
-              type="text"
-              placeholder="Your handicap"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            />
+
+          {/* Sign Out Button */}
+          <div className="pt-6 border-t border-gray-200">
+            <button
+              onClick={handleSignOut}
+              className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              Sign Out
+            </button>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Privacy Setting
-            </label>
-            <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-              <option>Friends Only</option>
-              <option>Public Profile</option>
-              <option>Private</option>
-            </select>
-          </div>
+        </div>
+
+        {/* Additional Info */}
+        <div className="mt-6 text-center text-sm text-gray-600">
+          <p>Need help? Contact support at support@golfgrid.com</p>
         </div>
       </div>
     </div>

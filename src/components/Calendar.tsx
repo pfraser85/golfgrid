@@ -1,7 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import DayTile from "./DayTile";
+import * as db from "@/lib/supabase-helpers";
+import type { Event as DBEvent, Availability as DBAvailability, TimeSlot } from "@/types/database";
 
 type AvailabilityType = "morning" | "midday" | "afternoon" | "full-day" | null;
 
@@ -22,6 +25,7 @@ export interface GolfEvent {
 }
 
 export default function Calendar() {
+  const { user } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [showCreateEvent, setShowCreateEvent] = useState(false);
@@ -37,6 +41,46 @@ export default function Calendar() {
   const [viewingEvent, setViewingEvent] = useState<GolfEvent | null>(null);
   const [editingEvent, setEditingEvent] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Load events and availability from Supabase
+  useEffect(() => {
+    if (!user) return;
+
+    const loadData = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch events
+        const dbEvents = await db.fetchUserEvents(user.id);
+        const formattedEvents: GolfEvent[] = dbEvents.map(event => ({
+          id: event.id,
+          courseName: event.course_name,
+          dateTime: new Date(event.tee_time),
+          invitedFriends: event.notes || undefined,
+        }));
+        setEvents(formattedEvents);
+
+        // Fetch availability
+        const dbAvailability = await db.fetchUserAvailability(user.id);
+        const availabilityMap = new Map<string, DayAvailability>();
+        dbAvailability.forEach(item => {
+          availabilityMap.set(item.date, {
+            date: new Date(item.date),
+            availability: item.time_slot as AvailabilityType,
+          });
+        });
+        setAvailability(availabilityMap);
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error loading calendar data:", error);
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [user]);
 
   // Generate calendar days for current month
   const getDaysInMonth = () => {
@@ -76,21 +120,32 @@ export default function Calendar() {
     }
   };
 
-  const handleAvailabilityChange = (date: Date, type: AvailabilityType) => {
+  const handleAvailabilityChange = async (date: Date, type: AvailabilityType) => {
+    if (!user) return;
+
     const dateKey = date.toISOString().split("T")[0];
     const newAvailability = new Map(availability);
 
-    if (type === null) {
-      newAvailability.delete(dateKey);
-    } else {
-      newAvailability.set(dateKey, {
-        date,
-        availability: type,
-      });
-    }
+    try {
+      if (type === null) {
+        // Remove availability
+        await db.removeAvailability(user.id, dateKey);
+        newAvailability.delete(dateKey);
+      } else {
+        // Set availability
+        await db.setAvailability(user.id, dateKey, type as TimeSlot);
+        newAvailability.set(dateKey, {
+          date,
+          availability: type,
+        });
+      }
 
-    setAvailability(newAvailability);
-    setSelectedDay(null);
+      setAvailability(newAvailability);
+      setSelectedDay(null);
+    } catch (error) {
+      console.error("Error updating availability:", error);
+      alert("Failed to update availability. Please try again.");
+    }
   };
 
   const getAvailabilityForDate = (date: Date): DayAvailability | undefined => {
@@ -106,30 +161,54 @@ export default function Calendar() {
     });
   };
 
-  const handleCreateEvent = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreateEvent = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!user) {
+      console.error("❌ No user found!");
+      return;
+    }
+
     const formData = new FormData(e.currentTarget);
     const courseName = formData.get("courseName") as string;
     const dateTimeStr = formData.get("dateTime") as string;
     const invitedFriends = formData.get("invitedFriends") as string;
 
-    const newEvent: GolfEvent = {
-      id: Date.now().toString(),
-      courseName,
-      dateTime: new Date(dateTimeStr),
-      invitedFriends: invitedFriends || undefined,
-    };
+    try {
+      const dbEvent = await db.createEvent(
+        user.id,
+        courseName,
+        new Date(dateTimeStr),
+        invitedFriends
+      );
 
-    setEvents([...events, newEvent]);
-    setShowCreateEvent(false);
+      const newEvent: GolfEvent = {
+        id: dbEvent.id,
+        courseName: dbEvent.course_name,
+        dateTime: new Date(dbEvent.tee_time),
+        invitedFriends: dbEvent.notes || undefined,
+      };
+
+      setEvents([...events, newEvent]);
+      setShowCreateEvent(false);
+    } catch (error) {
+      console.error("Error creating event:", error);
+      alert("Failed to create event. Please try again.");
+    }
   };
 
-  const handleCancelEvent = (eventId: string) => {
-    setEvents(events.filter(event => event.id !== eventId));
-    setViewingEvent(null);
+  const handleCancelEvent = async (eventId: string) => {
+    try {
+      await db.deleteEvent(eventId);
+      setEvents(events.filter(event => event.id !== eventId));
+      setViewingEvent(null);
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      alert("Failed to delete event. Please try again.");
+    }
   };
 
-  const handleUpdateEvent = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleUpdateEvent = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!viewingEvent) return;
 
@@ -138,23 +217,43 @@ export default function Calendar() {
     const dateTimeStr = formData.get("dateTime") as string;
     const invitedFriends = formData.get("invitedFriends") as string;
 
-    const updatedEvent: GolfEvent = {
-      ...viewingEvent,
-      courseName,
-      dateTime: new Date(dateTimeStr),
-      invitedFriends: invitedFriends || undefined,
-    };
+    try {
+      const dbEvent = await db.updateEvent(
+        viewingEvent.id,
+        courseName,
+        new Date(dateTimeStr),
+        invitedFriends
+      );
 
-    setEvents(events.map(event =>
-      event.id === viewingEvent.id ? updatedEvent : event
-    ));
-    setViewingEvent(null);
-    setEditingEvent(false);
+      const updatedEvent: GolfEvent = {
+        id: dbEvent.id,
+        courseName: dbEvent.course_name,
+        dateTime: new Date(dbEvent.tee_time),
+        invitedFriends: dbEvent.notes || undefined,
+      };
+
+      setEvents(events.map(event =>
+        event.id === viewingEvent.id ? updatedEvent : event
+      ));
+      setViewingEvent(null);
+      setEditingEvent(false);
+    } catch (error) {
+      console.error("Error updating event:", error);
+      alert("Failed to update event. Please try again.");
+    }
   };
 
-  const handleClearAllAvailability = () => {
-    setAvailability(new Map());
-    setShowClearConfirm(false);
+  const handleClearAllAvailability = async () => {
+    if (!user) return;
+
+    try {
+      await db.clearAllAvailability(user.id);
+      setAvailability(new Map());
+      setShowClearConfirm(false);
+    } catch (error) {
+      console.error("Error clearing availability:", error);
+      alert("Failed to clear availability. Please try again.");
+    }
   };
 
   const goToPreviousMonth = () => {
@@ -172,6 +271,20 @@ export default function Calendar() {
   const monthName = currentDate.toLocaleString("default", { month: "long" });
   const year = currentDate.getFullYear();
   const days = getDaysInMonth();
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="p-4 max-w-5xl mx-auto">
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-navy border-t-gold rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-navy font-semibold">Loading your calendar...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 max-w-5xl mx-auto">
@@ -345,22 +458,40 @@ export default function Calendar() {
               /* Create Event Form */
               <form
                 className="space-y-5"
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
+
+                  if (!user) {
+                    console.error("No user found!");
+                    return;
+                  }
+
                   const formData = new FormData(e.currentTarget);
                   const courseName = formData.get("courseName") as string;
                   const dateTimeStr = formData.get("dateTime") as string;
                   const invitedFriends = formData.get("invitedFriends") as string;
 
-                  const newEvent: GolfEvent = {
-                    id: Date.now().toString(),
-                    courseName,
-                    dateTime: new Date(dateTimeStr),
-                    invitedFriends: invitedFriends || undefined,
-                  };
+                  try {
+                    const dbEvent = await db.createEvent(
+                      user.id,
+                      courseName,
+                      new Date(dateTimeStr),
+                      invitedFriends
+                    );
 
-                  setEvents([...events, newEvent]);
-                  setSelectedDay(null);
+                    const newEvent: GolfEvent = {
+                      id: dbEvent.id,
+                      courseName: dbEvent.course_name,
+                      dateTime: new Date(dbEvent.tee_time),
+                      invitedFriends: dbEvent.notes || undefined,
+                    };
+
+                    setEvents([...events, newEvent]);
+                    setSelectedDay(null);
+                  } catch (error) {
+                    console.error("Error creating event:", error);
+                    alert("Failed to create event. Please try again.");
+                  }
                 }}
               >
                 {/* Golf Course Name */}
@@ -795,8 +926,10 @@ export default function Calendar() {
             </p>
 
             <form
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
+                if (!user) return;
+
                 const formData = new FormData(e.currentTarget);
                 const durationType = formData.get("durationType") as string;
                 const daysOfWeek = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
@@ -824,8 +957,9 @@ export default function Calendar() {
                   }
                 }
 
-                // Process each day of week
+                // Process each day of week and collect changes
                 const newAvailability = new Map(availability);
+                const availabilityToSet: Array<{ date: string; time_slot: TimeSlot }> = [];
                 const currentDateIter = new Date(startDate);
 
                 while (currentDateIter <= endDate) {
@@ -836,8 +970,14 @@ export default function Calendar() {
                   if (availabilityType === "none") {
                     // Remove availability for this date
                     newAvailability.delete(dateKey);
+                    // We'll remove these individually (batch delete is more complex)
+                    await db.removeAvailability(user.id, dateKey).catch(() => {});
                   } else if (availabilityType) {
-                    // Set availability for this date
+                    // Collect availability to set in batch
+                    availabilityToSet.push({
+                      date: dateKey,
+                      time_slot: availabilityType as TimeSlot,
+                    });
                     newAvailability.set(dateKey, {
                       date: new Date(currentDateIter),
                       availability: availabilityType,
@@ -847,8 +987,18 @@ export default function Calendar() {
                   currentDateIter.setDate(currentDateIter.getDate() + 1);
                 }
 
-                setAvailability(newAvailability);
-                setShowUpdateSchedule(false);
+                try {
+                  // Batch set availability
+                  if (availabilityToSet.length > 0) {
+                    await db.batchSetAvailability(user.id, availabilityToSet);
+                  }
+
+                  setAvailability(newAvailability);
+                  setShowUpdateSchedule(false);
+                } catch (error) {
+                  console.error("Error updating recurring availability:", error);
+                  alert("Failed to update availability. Please try again.");
+                }
               }}
               className="space-y-6"
             >
